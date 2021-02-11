@@ -1,0 +1,44 @@
+{
+  "tests": [
+    {
+      "name": "Compile Test",
+      "setup": "make",
+      "run": "./hw3 compile",
+      "input": "",
+      "output": "Compile test PASS",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 10
+    },
+    {
+      "name": "Read test",
+      "setup": "make",
+      "run": "./hw3 read",
+      "input": "",
+      "output": "Read test PASS",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 15
+    },
+    {
+      "name": "Write test",
+      "setup": "make",
+      "run": "./hw3 write",
+      "input": "",
+      "output": "Write test PASS",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 15
+    },
+    {
+      "name": "Round test",
+      "setup": "make",
+      "run": "./hw3 round",
+      "input": "",
+      "output": "Round test PASS",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 55
+    }
+  ]
+}
