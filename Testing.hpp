@@ -7,6 +7,7 @@
 
 #ifndef Testing_h
 #define Testing_h
+
 #include <string>
 #include <sstream>
 #include <map>
@@ -14,17 +15,20 @@
 #include <cstring>
 #include <cctype>
 #include "JSONReader.hpp"
-#include "Builder.hpp" 
+#include "JSONWriter.hpp"
+#include "Builder.hpp"
 
 namespace ECE141 {
   
   struct Testing  {
 
+    const int kMinDumpSize=600;
+
     Testing() {
     }
     
     ~Testing() {
-      std::cout << "Test Version 1.0\n";
+      std::cout << "Test Version 1.2\n";
     }
 
     //---------------------------
@@ -47,15 +51,78 @@ namespace ECE141 {
       }
       return ~theResult;
     }
-    
-    bool validateJSONEncode(std::string &aString) {
+     
+    //improved version of write test validator...
+    bool validateWriteTest(const std::string &aString) {
       //std::cout << aString << "\n";
-      //strip out all whitespace, newlines, tabs,...
-      auto theEnd=aString.end();
-      aString.erase(std::remove_if(aString.begin(), theEnd, ::isspace), theEnd);
-      return crc32(aString)==3977639632; //OMG! A magic number!
-    }
+      
+      if(aString.size()<kMinDumpSize)
+        return false; //too small...
 
+      static std::map<std::string, std::string> thePairs = {
+        {"\"version\"", "1.0"},
+        {"\"members\"", "{"},
+        {"child1a", "{"},
+        {"child1b", "{"},
+        {"child2", "{"},
+        {"child3", "{"},
+        {"\"price\"", "35.99"},
+        {"count", "oneA"},
+        {"amount", "3.14"},
+        {"size", "99"},
+      };
+      //class,name,used,amount,count, meta
+      
+      std::stringstream theInput(aString);
+      const int kBufSize=1024;
+      char theBuffer[1024];
+      
+      std::string theValue;
+      std::string theKey;
+      
+      while(!theInput.eof()) {
+        theInput.getline(theBuffer, kBufSize);
+        if(std::strlen(theBuffer)) {
+          
+          std::string temp(theBuffer);
+          
+          temp.erase(std::remove_if(temp.begin(),temp.end(),
+                                    ::isspace), temp.end());
+          
+          auto thePos=temp.find(':');
+          if (thePos!=std::string::npos) {
+            theValue=temp.substr(thePos+1);
+            theKey=temp.substr(0,thePos);
+            if(theValue[theValue.size()-1]==',') {
+              theValue.pop_back();
+            }
+            
+            if("\"used\""==theKey) {
+              char theChar=tolower(theValue[0]);
+              if(theChar!='t' && theChar!='f')
+                return false;
+            }
+            else if("\"amount\""==theKey) {
+              if(theValue!="3.14" && theValue!="6.28")
+                return false;
+            }
+            else if("\"count\""==theKey) {
+              if(theValue!="1234" && theValue!="567")
+                return false;
+            }
+            else if (thePairs.count(theKey) > 0) {
+              if(thePairs[theKey]!=theValue) {
+                return false;
+              }
+            }
+            
+          }
+
+        }
+      } //while
+      return true;
+    }
+    
     //write doc as JSON to stream, and verify output
     bool doWriteTest() {
       std::stringstream theStream;
@@ -63,7 +130,7 @@ namespace ECE141 {
       
       if(theDocument.toJSON(theStream)) {
         std::string theString=theStream.str();
-        return validateJSONEncode(theString);
+        return validateWriteTest(theString);
       }
       return false;
     }
@@ -187,25 +254,30 @@ namespace ECE141 {
    
     bool doRoundTripTest() {
       bool theResult=false;
-      std::stringstream theOutput;
-
+      std::stringstream theDocStream;
+      
       TestDocument theDocument;
-      if(theDocument.toJSON(theOutput)) {
-        std::string theStr=theOutput.str();
-       // std::cout << theStr << "\n";
-        std::stringstream theInput(theStr);
-        JSONModel theModel;
-        JSONReader theReader(theModel, theInput);
-        if(theReader.tokenize()) {
-          theModel.debugDump(std::cout);
-          
-          if(TestDocument *theClone=Builder::create(theModel)) {
-            std::stringstream theOutput2;
-            if(theClone->toJSON(theOutput2)) {
-              std::string theStr2=theOutput.str();
-              theResult=crc32(theStr)==crc32(theStr2);
+      if(theDocument.toJSON(theDocStream)) {
+        std::string theDocJSON=theDocStream.str();
+        if(theDocJSON.size()>kMinDumpSize) {
+          std::stringstream theInput(theDocJSON);
+          JSONModel theModel;
+          JSONReader theReader(theModel, theInput);
+          if(theReader.tokenize()) {
+            std::stringstream theDump;
+            theModel.debugDump(theDump);
+            if(theDump.str().size()>kMinDumpSize) {
+              if(TestDocument *theClone=Builder::create(theModel)) {
+                std::stringstream theCloneStream;
+                if(theClone->toJSON(theCloneStream)) {
+                  std::string theCloneJSON=theCloneStream.str();
+                  if(theDocJSON.size()==theCloneJSON.size()) {
+                    theResult=crc32(theDocJSON)==crc32(theCloneJSON);
+                  }
+                }
+                delete theClone;
+              }
             }
-            delete theClone;
           }
         }
       }
