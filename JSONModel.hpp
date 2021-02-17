@@ -12,6 +12,7 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
+#include <vector>
 
 namespace ECE141 {
 
@@ -21,69 +22,124 @@ namespace ECE141 {
 
   enum class JSONType {object, list, element, constant, unknown};
 
-  //-----------------------------
+  //-----JSONPart-----//
 
   struct JSONPart {
-    JSONPart(JSONType aType) : type(aType) {}
-    virtual void debugDump(std::ostream &anOutput, int indent=0);
+      JSONPart(JSONType aType) : type(aType) {};
+      virtual ~JSONPart() {};
 
-    JSONType type;
+      virtual void debugDump(std::ostream& anOutput, int indent = 0) {};
+      virtual void addElement(JSONPart* const aPart) {};
+      
+      JSONType type;
   };
 
-  //-----------------------------
+  //-----JSONPart-----//
+
+  //-----JSONStrConst-----//
 
   struct JSONStrConst : public JSONPart {
-    JSONStrConst(const std::string &aValue)
-      : JSONPart(JSONType::constant), value(aValue) {}
+  public:
+      JSONStrConst(const std::string& aValue)
+          : JSONPart(JSONType::constant), value(aValue) {};
 
-    virtual void debugDump(std::ostream &anOutput, int anIndent=0);
+      virtual ~JSONStrConst() {};
 
-    std::string value;
+      virtual void debugDump(std::ostream &anOutput, int anIndent=0);
+      
+  protected:
+      std::string value;
   };
 
-  //-----------------------------
+  //-----JSONStrConst-----//
+
+  //-----JSONElement-----//
 
   class JSONElement : public JSONPart {
   public:
+      JSONElement(const std::string &aKey, JSONPart *aValue=nullptr) : 
+          JSONPart(JSONType::element),
+          key(aKey),
+          value(aValue) {};
 
-    JSONElement(const std::string &aKey, JSONPart *aValue=nullptr);
+      virtual ~JSONElement();
+
+      virtual void debugDump(std::ostream& anOutput, int indent = 0);
+      virtual void addElement(JSONPart* const aPart);
 
   protected:
-    std::string key;
-    JSONPart    *value;
+      std::string key;
+      JSONPart    *value;
   };
 
-  //-----------------------------
+  //-----JSONElement-----//
+
+  //-----JSONList-----//
 
   class JSONList : public JSONPart {
   public:
-    JSONList(const std::string &aName);
+      JSONList(const std::string &aName) : 
+          listName(aName),
+          JSONPart(JSONType::list) {};
+
+      virtual ~JSONList();
+
+      virtual void debugDump(std::ostream& anOutput, int indent = 0);
+      virtual void addElement(JSONPart* const aPart);
+      
 
   protected:
-
-    //STUDENT: add something to hold list of items...
+      //STUDENT: add something to hold list of items...
+      std::string listName;
+      std::vector<JSONPart*> elementList;
+    
   };
 
-  //-----------------------------
+  //-----JSONList-----//
+
+  //-----JSONObject-----//
 
   class JSONObject : public JSONPart{
   public:
+      JSONObject(const std::string &aName) :
+          objectName(aName),
+          JSONPart(JSONType::object) {};
 
-    JSONObject(const std::string &aName);
+      virtual ~JSONObject();
+
+      virtual void debugDump(std::ostream& anOutput, int indent = 0);
+      virtual void addElement(JSONPart* const aPart);
+      
 
   protected:
-
-    //STUDENT: add something to hold key value pairs...
+      //STUDENT: add something to hold key value pairs...
+      std::string objectName;
+      std::vector<JSONPart*> elementList;
+    
   };
+
+  //-----JSONObject-----//
+
+  //-----JSONModel-----//
 
   class JSONModel : public JSONPart {
   public:
-    JSONModel();
-   
-    //STUDENT: implement these methods...
+      JSONModel() : 
+          baseObject(nullptr), 
+          JSONPart(JSONType::unknown) {};
+
+      virtual ~JSONModel();
+
+      virtual void debugDump(std::ostream& anOutput, int indent = 0);
+
+      void setBase(JSONPart* const aPart);
+
+  protected:
+      JSONPart* baseObject;
 
   };
- 
+
+  //-----JSONModel-----//
 
 }
 #endif /* JSONModel_hpp */

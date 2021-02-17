@@ -15,7 +15,7 @@
 #include <cstring>
 #include <cctype>
 #include "JSONReader.hpp"
-#include "JSONWriter.hpp"
+//#include "JSONWriter.hpp"
 #include "Builder.hpp"
 
 namespace ECE141 {
@@ -242,7 +242,7 @@ namespace ECE141 {
         if(theReader.tokenize()) {
           std::stringstream theDumpStream;
           theModel.debugDump(theDumpStream);
-          //std::cout << "dump " << theDumpStream.str() << "\n";
+          std::cout << "dump " << theDumpStream.str() << "\n";
           return validateReaderDump(theDumpStream.str());
         }        
       }

@@ -8,29 +8,95 @@
 #include "JSONModel.hpp"
 
 namespace ECE141 {
-  
-  void JSONPart::debugDump(std::ostream &anOutput, int anIndent) {
-  }
-  
-  //---------------------------------------
-
-  JSONElement::JSONElement(const std::string &aKey,
-                           JSONPart *aValue)
-    : JSONPart(JSONType::element), key(aKey), value(aValue) {}
-
-  //---------------------------------------
-
-  JSONList::JSONList(const std::string &aName)
-    : JSONPart(JSONType::list) {}
-
-
-  JSONObject::JSONObject(const std::string &aName) : JSONPart(JSONType::object) {}
-  
-
-  //---------------------------------------
-
-  JSONModel::JSONModel() : JSONPart(JSONType::object) {
-  }
-
+    //-----JSONStrConst-----//
     
+    void JSONStrConst::debugDump(std::ostream& anOutput, int anIndent) {
+        anOutput << value << std::endl;
+    }
+
+    //-----JSONStrConst-----//
+    
+    //-----JSONElement-----//
+    
+    JSONElement::~JSONElement() {
+        delete value;
+    }
+    
+    void JSONElement::debugDump(std::ostream& anOutput, int indent) {
+        for (int i = 0; i < indent; ++i)
+            anOutput << " ";
+        anOutput << key << "=";
+
+        if (value->type == JSONType::constant)
+            value->debugDump(anOutput);
+        else {
+            for (int i = 0; i < 4; ++i)
+                anOutput << " ";
+            value->debugDump(anOutput, indent + 4);
+        }
+    }
+
+    void JSONElement::addElement(JSONPart* const aPart) {
+        value = aPart;
+    }
+    
+    //-----JSONElement-----//
+    
+    //-----JSONList-----//
+    
+    JSONList::~JSONList() {
+        for (auto cur : elementList)
+            delete cur;
+    }
+    
+    void JSONList::debugDump(std::ostream& anOutput, int indent) {
+        anOutput << "(list):\n";
+        
+        for (int i = 0; i < elementList.size(); ++i)
+            elementList[i]->debugDump(anOutput, indent + 4);
+    }
+
+    void JSONList::addElement(JSONPart* const aPart) {
+        elementList.push_back(aPart);
+    }
+    
+    //-----JSONList-----//
+    
+    //-----JSONObject-----//
+    
+    JSONObject::~JSONObject() {
+        for (auto cur : elementList)
+            delete cur;
+    }
+    
+    void JSONObject::debugDump(std::ostream& anOutput, int indent) {
+        for (int i = 0; i < indent; ++i)
+            anOutput << " ";
+        anOutput << "(object):\n";
+        
+        for (int i = 0; i < elementList.size(); ++i)
+            elementList[i]->debugDump(anOutput, indent + 4);
+    }
+
+    void JSONObject::addElement(JSONPart* const aPart) {
+        elementList.push_back(aPart);
+    }
+
+    //-----JSONObject-----//
+    
+    //-----JSONModel-----//
+    
+    JSONModel::~JSONModel() {
+        delete baseObject;
+    }
+    
+    void JSONModel::debugDump(std::ostream& anOutput, int indent) {
+        baseObject->debugDump(anOutput, 0);
+    }
+    
+    void JSONModel::setBase(JSONPart* const aPart) {
+        baseObject = aPart;
+    }
+    
+    //-----JSONModel-----//
 }

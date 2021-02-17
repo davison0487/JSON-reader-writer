@@ -35,7 +35,7 @@ int main(int argc, const char * argv[]) {
         << theStatus[theTests.doReadTest()] << ".\n";
     }
     else if ("round"==temp) {
-      std::cout << "Round-trip test "
+      std::cout << "Round test "
         << theStatus[theTests.doRoundTripTest()] << ".\n";
     }
   }

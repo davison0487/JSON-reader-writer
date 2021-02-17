@@ -30,6 +30,8 @@ namespace ECE141 {
     bool parseElements(char aChar);
     
     JSONModel &model;
+
+    std::stack<JSONPart*> partStack;
   };
 
 }

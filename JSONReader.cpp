@@ -58,35 +58,97 @@ namespace ECE141 {
     bool theResult=true;
     
     TokenType theType = determineType(aChar);
-    std::string temp;
+    std::string temp("");
 
     switch(theType) {
-      case TokenType::openObject:
+    case TokenType::openObject: {
+        if (partStack.size() != 0) {
+            //not the base object
+            JSONPart* theObject = new JSONObject(temp);
+            JSONPart* topPart = partStack.top();
+            topPart->addElement(theObject);
+            partStack.push(theObject);
+        }
+        else {
+            //is base object
+            JSONPart* theBaseObject = new JSONObject("base");
+            partStack.push(theBaseObject);
+        }
         break;
-        
-      case TokenType::openList:
+    }
+    
+    case TokenType::openList: {
+        JSONPart* topPart = partStack.top();
+        JSONPart* theList = new JSONList(temp);
+        topPart->addElement(theList);
+        partStack.push(theList);
         break;
-
-      case TokenType::closeList:
+    }
+    
+    case TokenType::closeList: {
+        partStack.pop();          //pop list
+        JSONPart* topPart = partStack.top();
+        if (topPart->type == JSONType::element) {
+            //element complete
+            partStack.pop();
+        }
         break;
-
-      case TokenType::closeObject:
+    }
+    
+    case TokenType::closeObject: {
+        JSONPart* topPart = partStack.top();
+        partStack.pop();          //pop object
+        if (partStack.size() == 0) {
+            //base object complete, set the baseObject to top object
+            model.setBase(topPart);
+            break;
+        }
+        topPart = partStack.top();
+        if (topPart->type == JSONType::element) {
+            //element complete
+            partStack.pop();
+        }
         break;
-        
-      case TokenType::quoted:
+    }
+    
+    case TokenType::quoted: {
         temp = readUntil(isQuote, false);
         skipIfChar(kQuote);
+        JSONPart* topPart = partStack.top();
+        if (topPart->type == JSONType::element) {
+            //if top part is an element, complete it and pop out of stack
+            JSONPart* newStrConst = new JSONStrConst(temp); 
+            topPart->addElement(newStrConst);
+            partStack.pop();
+        }
+        else {
+            //if it is not, add a new element to the top part and push to stack
+            JSONPart* newElement = new JSONElement(temp);
+            topPart->addElement(newElement);
+            partStack.push(newElement);
+        }
         break;
-                
-      case TokenType::constant:
-        temp=readWhile(isContant, false);
+    }
+    
+    case TokenType::constant: {
+        temp = readWhile(isContant, false);
         temp.insert(0, 1, aChar);
+        JSONPart* topPart = partStack.top();
+        JSONPart* newStrConst = new JSONStrConst(temp);
+        topPart->addElement(newStrConst);
+        if (topPart->type == JSONType::element) {
+            //if top part is an element, it is completed
+            partStack.pop();
+        }
         break;
+    }
         
-      case TokenType::colon:
+        
+    case TokenType::colon: {
         break; //likely between key/value
-                        
-      default: break;
+    }
+    
+    default: break;
     }
     
     skipWhile(isWhitespace);

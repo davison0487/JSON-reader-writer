@@ -13,7 +13,8 @@ namespace ECE141 {
   TestClass3::TestClass3(const std::string &aName,
                          Color aColor, const char *aBuf)
     : name(aName), color(aColor) {      
-      std::strncpy(initials, aBuf,3);
+      //std::strncpy(initials, aBuf,3);  //autograder
+      strncpy_s(initials, 4 ,aBuf, 3); //windows
     }
 
   TestClass3::~TestClass3() {}
