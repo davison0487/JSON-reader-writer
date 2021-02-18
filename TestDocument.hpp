@@ -31,7 +31,32 @@ namespace ECE141 {
     ~TestDocument() {}
 
     virtual bool toJSON(std::ostream &aStream) {
-     return true;
+        aStream << "{\n"
+            //-----meta------//
+            << "\"meta\" : {\n"
+            << "\"class\" : \"TestDocument\",\n"
+            << "\"version\" : 1.0\n"
+            << "},\n"
+            //-----meta-----//
+            //-----members-----//
+            << "\"members\" : {\n"
+            << "\"child1a\" : ";
+        child1a.toJSON(aStream);
+        aStream << ",\n"
+            << "\"child1b\" : ";
+        child1b.toJSON(aStream);
+        aStream << ",\n"
+            << "\"child2\" : ";
+        child2.toJSON(aStream);
+        aStream << ",\n"
+            << "\"child3\" : ";
+        child3.toJSON(aStream);
+        aStream << ",\n"
+            << "\"price\" : " << price << std::endl
+            << "}\n"
+            //-----members-----//
+            << "}\n";
+        return true;
     }
     
   protected:

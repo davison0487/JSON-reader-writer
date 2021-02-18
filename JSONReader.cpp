@@ -121,6 +121,11 @@ namespace ECE141 {
             topPart->addElement(newStrConst);
             partStack.pop();
         }
+        else if (topPart->type == JSONType::list) {
+            //if top part is a list, add a new element to it
+            JSONPart* newStrConst = new JSONStrConst(temp);
+            topPart->addElement(newStrConst);
+        }
         else {
             //if it is not, add a new element to the top part and push to stack
             JSONPart* newElement = new JSONElement(temp);
@@ -147,7 +152,7 @@ namespace ECE141 {
     case TokenType::colon: {
         break; //likely between key/value
     }
-    
+                         
     default: break;
     }
     

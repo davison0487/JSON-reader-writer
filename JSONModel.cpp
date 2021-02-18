@@ -30,8 +30,9 @@ namespace ECE141 {
         if (value->type == JSONType::constant)
             value->debugDump(anOutput);
         else {
-            for (int i = 0; i < 4; ++i)
+            for (int i = 0; i < indent; ++i)
                 anOutput << " ";
+            anOutput << "\n";
             value->debugDump(anOutput, indent + 4);
         }
     }
@@ -50,6 +51,8 @@ namespace ECE141 {
     }
     
     void JSONList::debugDump(std::ostream& anOutput, int indent) {
+        for (int i = 0; i < indent; ++i)
+            anOutput << " ";
         anOutput << "(list):\n";
         
         for (int i = 0; i < elementList.size(); ++i)

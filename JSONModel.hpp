@@ -110,7 +110,6 @@ namespace ECE141 {
       virtual void debugDump(std::ostream& anOutput, int indent = 0);
       virtual void addElement(JSONPart* const aPart);
       
-
   protected:
       //STUDENT: add something to hold key value pairs...
       std::string objectName;

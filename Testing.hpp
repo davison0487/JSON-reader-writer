@@ -242,7 +242,7 @@ namespace ECE141 {
         if(theReader.tokenize()) {
           std::stringstream theDumpStream;
           theModel.debugDump(theDumpStream);
-          std::cout << "dump " << theDumpStream.str() << "\n";
+          //std::cout << "dump " << theDumpStream.str() << "\n";
           return validateReaderDump(theDumpStream.str());
         }        
       }
