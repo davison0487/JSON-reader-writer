@@ -10,11 +10,11 @@
 #include <iostream>
 
 namespace ECE141 {
-
-  class Storable {
-  public:
-    virtual bool toJSON(std::ostream &aStream)=0;
-};
+    
+    class Storable {
+    public:
+        virtual bool toJSON(std::ostream &aStream)=0;
+    };
 
 }
 

@@ -13,6 +13,10 @@ namespace ECE141 {
     void JSONStrConst::debugDump(std::ostream& anOutput, int anIndent) {
         anOutput << value << std::endl;
     }
+    
+    std::string JSONStrConst::getValue() {
+        return value;
+    }
 
     //-----JSONStrConst-----//
     
@@ -40,6 +44,27 @@ namespace ECE141 {
     void JSONElement::addElement(JSONPart* const aPart) {
         value = aPart;
     }
+
+    JSONList* JSONElement::getList() {
+        if (value->type != JSONType::list) {
+            return nullptr;
+        }
+        return dynamic_cast<JSONList*>(value);
+    }
+
+    JSONObject* JSONElement::getObject() {
+        if (value->type != JSONType::object) {
+            return nullptr;
+        }
+        return dynamic_cast<JSONObject*>(value);
+    }
+
+    JSONStrConst* JSONElement::getConst() {
+        if (value->type != JSONType::constant) {
+            return nullptr;
+        }
+        return dynamic_cast<JSONStrConst*>(value);
+    }
     
     //-----JSONElement-----//
     
@@ -62,6 +87,17 @@ namespace ECE141 {
     void JSONList::addElement(JSONPart* const aPart) {
         elementList.push_back(aPart);
     }
+
+    std::vector<JSONStrConst*> JSONList::getStrConst() {
+        if (elementList[0]->type != JSONType::constant) {
+            return {};
+        }
+        std::vector<JSONStrConst*> newConstList;
+        for (auto element : elementList) {
+            newConstList.push_back(dynamic_cast<JSONStrConst*>(element));
+        }
+        return newConstList;
+    };
     
     //-----JSONList-----//
     
@@ -85,6 +121,14 @@ namespace ECE141 {
         elementList.push_back(aPart);
     }
 
+    std::vector<JSONElement*> JSONObject::getElement() {
+        std::vector<JSONElement*> newElementList;
+        for (auto element : elementList) {
+            newElementList.push_back(dynamic_cast<JSONElement*>(element));
+        }
+        return newElementList;
+    }
+
     //-----JSONObject-----//
     
     //-----JSONModel-----//
@@ -102,4 +146,5 @@ namespace ECE141 {
     }
     
     //-----JSONModel-----//
+
 }

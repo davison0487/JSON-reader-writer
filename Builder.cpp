@@ -10,12 +10,9 @@
 namespace ECE141 {
 
   TestDocument* Builder::create(JSONModel &aModel) {
-    
-    //STUDENT implement
-    //Read the model, and construct Document and test child classes
-    //return a newly created Document based on given model...
-    
-    return nullptr;
+      TestDocument* newTestDocument = new TestDocument();
+      newTestDocument->buildClass(aModel.getBaseObject());
+      return newTestDocument;
   }
 
 }

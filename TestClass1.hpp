@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string>
 #include "Storable.hpp"
+#include "JSONModel.hpp"
 
 namespace ECE141 {
 
@@ -22,6 +23,8 @@ namespace ECE141 {
     virtual ~TestClass1();
     
     bool toJSON(std::ostream &aStream);
+
+    void buildClass(JSONObject* aObject);
         
   protected:
     std::string name;

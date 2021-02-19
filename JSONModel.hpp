@@ -36,6 +36,10 @@ namespace ECE141 {
 
   //-----JSONPart-----//
 
+  //forward declaration
+  class JSONList;
+  class JSONObject;
+
   //-----JSONStrConst-----//
 
   struct JSONStrConst : public JSONPart {
@@ -47,6 +51,8 @@ namespace ECE141 {
 
       virtual void debugDump(std::ostream &anOutput, int anIndent=0);
       
+      std::string getValue();
+
   protected:
       std::string value;
   };
@@ -67,6 +73,13 @@ namespace ECE141 {
       virtual void debugDump(std::ostream& anOutput, int indent = 0);
       virtual void addElement(JSONPart* const aPart);
 
+      std::string getKey() { return key; };
+
+      JSONList* getList();
+      JSONObject* getObject();
+      JSONStrConst* getConst();
+
+
   protected:
       std::string key;
       JSONPart    *value;
@@ -86,7 +99,8 @@ namespace ECE141 {
 
       virtual void debugDump(std::ostream& anOutput, int indent = 0);
       virtual void addElement(JSONPart* const aPart);
-      
+
+      std::vector<JSONStrConst*> getStrConst();
 
   protected:
       //STUDENT: add something to hold list of items...
@@ -110,6 +124,8 @@ namespace ECE141 {
       virtual void debugDump(std::ostream& anOutput, int indent = 0);
       virtual void addElement(JSONPart* const aPart);
       
+      std::vector<JSONElement*> getElement();
+      
   protected:
       //STUDENT: add something to hold key value pairs...
       std::string objectName;
@@ -132,6 +148,8 @@ namespace ECE141 {
       virtual void debugDump(std::ostream& anOutput, int indent = 0);
 
       void setBase(JSONPart* const aPart);
+
+      JSONObject* getBaseObject() { return dynamic_cast<JSONObject*>(baseObject); };
 
   protected:
       JSONPart* baseObject;

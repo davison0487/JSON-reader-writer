@@ -13,13 +13,42 @@
 #include <map>
 #include <algorithm>
 #include <cstring>
+#include <cstdlib>
+#include <ctime>
 #include <cctype>
 #include "JSONReader.hpp"
-//#include "JSONWriter.hpp"
 #include "Builder.hpp"
 
 namespace ECE141 {
   
+  class TestDocument2 : public TestDocument {
+  public:
+    
+    TestDocument2() : TestDocument() {
+      child1a=TestClass1("OneA",randomBool(), randomFloat(), randomInt());
+      child1b=TestClass1("OneB",randomBool(), randomFloat(), randomInt());
+      child2=TestClass2("TWO", randomSize(),
+                ECE141::Metadata{randomChar(), randomByte(), randomBool()} );
+      child3=TestClass3("THREE", randomColor(), "MEG" );
+      price=76.50;
+    }
+    
+    char randomChar() {return 'A' + rand() % 26;}
+    uint8_t randomByte() {return (uint8_t) rand() % (100 - 5) + 5;}
+    
+    int randomInt() {return (int) rand() % (10000 - 100) + 100;}
+    size_t randomSize()  {return (size_t) rand() % (10000 - 100) + 100;}
+    bool randomBool() {return rand() % 2;}
+    float randomFloat() {return 1.05 * (1+randomByte());}
+    ECE141::Color randomColor() {
+      switch(rand()%3) {
+        case 0: return Color::red;
+        case 1: return Color::green;
+        default: return Color::blue;
+      }
+    }
+  };
+
   struct Testing  {
 
     const int kMinDumpSize=600;
@@ -28,7 +57,7 @@ namespace ECE141 {
     }
     
     ~Testing() {
-      std::cout << "Test Version 1.2\n";
+      std::cout << "Test Version 1.4\n";
     }
 
     //---------------------------
@@ -40,8 +69,13 @@ namespace ECE141 {
     //---------------------------
     
     uint32_t crc32(const std::string &aString) {
-      const char* aBuffer=aString.c_str();
-      uint32_t theResult = ~0; const char *end = aBuffer + aString.size();
+      std::string temp(aString);
+      temp.erase(std::remove_if(temp.begin(),temp.end(),
+                                ::isspace), temp.end());
+      
+      const char *aBuffer=temp.c_str();
+      const char *end = aBuffer + temp.size();
+      uint32_t theResult = ~0;
       while(aBuffer < end) {
         theResult ^= *aBuffer++;
         for(int i = 0; i < 8; i++) {
@@ -252,36 +286,77 @@ namespace ECE141 {
 
     //---------------------------
    
-    bool doRoundTripTest() {
+    bool doRoundTripTest2() {
       bool theResult=false;
       std::stringstream theDocStream;
       
-      TestDocument theDocument;
+      TestDocument2 theDocument;
       if(theDocument.toJSON(theDocStream)) {
         std::string theDocJSON=theDocStream.str();
+        //std::cout << theDocStream.str();
         if(theDocJSON.size()>kMinDumpSize) {
           std::stringstream theInput(theDocJSON);
           JSONModel theModel;
-          JSONReader theReader(theModel, theInput);
+          JSONReader theReader(theModel, theInput);         
           if(theReader.tokenize()) {
-            std::stringstream theDump;
-            theModel.debugDump(theDump);
-            if(theDump.str().size()>kMinDumpSize) {
-              if(TestDocument *theClone=Builder::create(theModel)) {
-                std::stringstream theCloneStream;
-                if(theClone->toJSON(theCloneStream)) {
-                  std::string theCloneJSON=theCloneStream.str();
-                  if(theDocJSON.size()==theCloneJSON.size()) {
-                    theResult=crc32(theDocJSON)==crc32(theCloneJSON);
-                  }
+            if(TestDocument *theClone=Builder::create(theModel)) {
+              std::stringstream theCloneStream;
+              if(theClone->toJSON(theCloneStream)) {
+                //std::cout << theCloneStream.str();
+                std::string theCloneJSON=theCloneStream.str();
+                if(theDocJSON.size()==theCloneJSON.size()) {
+                  theResult=crc32(theDocJSON)==crc32(theCloneJSON);
                 }
-                delete theClone;
               }
+              delete theClone;
             }
           }
         }
       }
       return theResult;
+    }
+    
+    //---------------------------
+
+    bool doRoundTripTest() {
+      bool theResult=false;
+      std::stringstream theDocStream;
+      
+      srand(time(0));
+
+      TestDocument theDocument;
+      if(theDocument.toJSON(theDocStream)) {
+        
+        //std::cout << theDocStream.str() << "\n";
+        std::string theDocJSON=theDocStream.str();
+        if(theDocJSON.size()>kMinDumpSize) {
+          
+          if(validateWriteTest(theDocJSON)) {
+            std::stringstream theInput(theDocJSON);
+            JSONModel theModel;
+            JSONReader theReader(theModel, theInput);
+            if(theReader.tokenize()) {
+              std::stringstream theDump;
+              theModel.debugDump(theDump);
+              //std::cout << theDump.str() << "\n";
+              
+              if(theDump.str().size()>kMinDumpSize) {
+                if(TestDocument *theClone=Builder::create(theModel)) {
+                  std::stringstream theCloneStream;
+                  if(theClone->toJSON(theCloneStream)) {                  
+                    std::string theCloneJSON=theCloneStream.str();
+                    if(theDocJSON.size()==theCloneJSON.size()) {
+                      theResult=crc32(theDocJSON)==crc32(theCloneJSON);
+                    }
+                  }
+                  delete theClone;
+                }
+              }
+            }
+          }
+        }
+      }
+      return theResult ? doRoundTripTest2() : false;
     }
         
   };

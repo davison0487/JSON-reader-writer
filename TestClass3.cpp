@@ -44,5 +44,55 @@ namespace ECE141 {
     return true;
   }
 
+  void TestClass3::buildClass(JSONObject* aObject) {
+      std::vector<JSONElement*> elements = aObject->getElement();
+      JSONObject* membersObject = nullptr;
+
+      for (auto element : elements) {
+          if (element->getKey() == "members") {
+              membersObject = element->getObject();
+          }
+      }
+
+      std::vector<JSONElement*> members = membersObject->getElement();
+      
+      for (auto member : members) {
+          std::string memberName = member->getKey();
+          if (memberName == "name") {
+              name = member->getConst()->getValue();
+          }
+          else if (memberName == "initials") {
+              std::vector <JSONStrConst*> initialsConsts = member->getList()->getStrConst();
+              for (int i = 0; i < initialsConsts.size(); ++i) {
+                  initials[i] = initialsConsts[i]->getValue()[0];
+              }
+              initials[3] = '\0';
+          }
+          else if (memberName == "color") {
+              int temp = stoi(member->getConst()->getValue());
+              switch (temp) {
+              case 0: {
+                  color = Color::red;
+                  break;
+              }
+              case 1: {
+                  color = Color::green;
+                  break;
+              }
+              case 2: {
+                  color = Color::blue;
+                  break;
+              }
+              default: {
+                  color = Color::red;
+                  break;
+              }
+              }
+          }
+          else
+              continue;
+      }
+      
+  }
 
 }

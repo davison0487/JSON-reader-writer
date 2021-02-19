@@ -8,7 +8,7 @@
 #include "TestClass1.hpp"
 #include <unordered_map>
 
-static std::unordered_map<bool, std::string> boolMap{ {false, "false"}, {true, "true"} };
+static std::unordered_map<bool, std::string> bool2str{ {false, "false"}, {true, "true"} };
 
 namespace ECE141 {
 
@@ -31,11 +31,45 @@ namespace ECE141 {
           << "\"name\" : " << "\"" << name << "\",\n"
           << "\"count\" : " << count << ",\n"
           << "\"amount\" : " << amount << ",\n"
-          << "\"used\" : " << boolMap[used] << std::endl
+          << "\"used\" : " << bool2str[used] << std::endl
           << "}\n"
           //-----members-----//
           << "}\n";
       return true;
+  }
+
+  void TestClass1::buildClass(JSONObject* aObject) {
+      std::vector<JSONElement*> elements = aObject->getElement();
+      JSONObject* membersObject = nullptr;
+
+      for (auto element : elements) {
+          if (element->getKey() == "members") {
+              membersObject = element->getObject();
+          }
+      }
+
+      std::vector<JSONElement*> members = membersObject->getElement();
+
+      for (auto member : members) {
+          std::string memberName = member->getKey();
+          if (memberName == "name") {
+              name = member->getConst()->getValue();
+          }
+          else if (memberName == "count") {
+              std::string temp = member->getConst()->getValue();
+              count = std::stoi(temp);
+          }
+          else if (memberName == "amount") {
+              std::string temp = member->getConst()->getValue();
+              amount = std::stof(temp);
+          }
+          else if (memberName == "used") {
+              std::string temp = member->getConst()->getValue();
+              used = temp == "true" ? true : false;
+          }
+          else
+              continue;
+      }
   }
 
 }

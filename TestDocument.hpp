@@ -13,6 +13,7 @@
 #include "TestClass1.hpp"
 #include "TestClass2.hpp"
 #include "TestClass3.hpp"
+#include "JSONModel.hpp"
 
 namespace ECE141 {
     
@@ -58,6 +59,42 @@ namespace ECE141 {
             << "}\n";
         return true;
     }
+
+    void buildClass(JSONObject* aObject) {
+        std::vector<JSONElement*> elements = aObject->getElement();
+        JSONObject* membersObject = nullptr;
+
+        for (auto element : elements) {
+            if (element->getKey() == "members") {
+                membersObject = element->getObject();
+            }
+        }
+
+        std::vector<JSONElement*> members = membersObject->getElement();
+
+        for (auto member : members) {
+            std::string memberName = member->getKey();
+            if (memberName == "child1a") {
+                child1a.buildClass(member->getObject());
+            }
+            else if (memberName == "child1b") {
+                child1b.buildClass(member->getObject());
+            }
+            else if (memberName == "child2") {
+                child2.buildClass(member->getObject());
+            }
+            else if (memberName == "child3") {
+                child3.buildClass(member->getObject());
+            }
+            else if (memberName == "price") {
+                std::string temp = member->getConst()->getValue();
+                price = std::stof(temp);
+            }
+            else
+                continue;
+        }
+
+    };
     
   protected:
     TestClass1 child1a;
